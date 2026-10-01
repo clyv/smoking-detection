@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+*.pt
+data/raw/
+data/merged/
+data/negatives/
+data/splits/
+data/tracks/
+data/prelabels/
+data/clips/videos/
+data/smoking.yaml
+audit/
+runs/
+models/

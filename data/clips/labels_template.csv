@@ -1,0 +1,5 @@
+video_path,label,start_s,end_s,notes
+data/clips/videos/example_smoker_01.mp4,smoking,0,,one person smoking a cigarette outdoors
+data/clips/videos/example_vape_01.mp4,smoking,5,40,vaping (trimmed to 5-40 s)
+data/clips/videos/example_drinking_01.mp4,not_smoking,,,drinking coffee (hard negative)
+data/clips/videos/example_phone_01.mp4,not_smoking,,,phone call with hand at face (hard negative)

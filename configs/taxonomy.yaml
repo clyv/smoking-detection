@@ -1,0 +1,33 @@
+# Unified label set for the OBJECT detector (stage 1).
+#
+# "person" is deliberately NOT a detector class. People come from the pose
+# model in stage 2. Several sources do not label people at all, and training
+# a person class on partially-labelled data teaches the model that unlabelled
+# people are background.
+#
+# Order matters: the index of each class is its YOLO class id.
+classes:
+  - cigarette
+  - vape
+  - cigar
+  - pipe
+  - smoke
+
+# Classes that count as a "smoking object" for image-level metrics and for
+# the fusion rule. Smoke/vapor is supporting evidence, not an object in hand.
+smoking_objects:
+  - cigarette
+  - vape
+  - cigar
+  - pipe
+
+# Text prompts for YOLO-World (zero-shot baseline, pre-labelling, screening).
+# Several prompts per class are allowed; detections from any of them count
+# as that class. YOLO-World was pretrained on Objects365, which has a single
+# combined "Cigar/Cigarette" class, so expect it to confuse those two.
+prompts:
+  cigarette: ["cigarette"]
+  vape: ["vape", "e-cigarette"]
+  cigar: ["cigar"]
+  pipe: ["tobacco pipe"]
+  smoke: ["smoke"]

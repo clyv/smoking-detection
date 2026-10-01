@@ -1,0 +1,56 @@
+# Settings for the 3-stage pipeline (scripts 08, 09, 10).
+# Distances are in shoulder widths of the person, so they work at any camera distance.
+
+# Stage 2: people, keypoints and tracking
+pose_model: yolo11n-pose.pt
+tracker: bytetrack.yaml
+pose_conf: 0.30
+pose_imgsz: 640
+kp_conf_thr: 0.30          # keypoints below this confidence are treated as missing
+
+# Stage 1: smoking objects
+detector:
+  type: yoloworld          # use "yoloworld" until your own detector is trained, then "yolo"
+  weights: yolov8l-worldv2.pt   # after step 7: runs/detect/<name>/weights/best.pt
+  conf: 0.10               # keep low here; the fusion step applies the real thresholds
+  imgsz: 960
+
+# Timing
+target_fps: 10             # frames are subsampled to roughly this rate
+window_s: 6                # one decision covers this many seconds of a person's track
+hop_s: 1                   # a new decision every hop
+buffer_s: 20               # history kept per track (for the "busy hands" check)
+max_missing_s: 1.5         # a track unseen for longer than this is closed
+
+# Feature extraction (stage 2)
+features:
+  radius_face: 0.8         # object counts as "at the mouth" within this many shoulder widths
+  radius_hand: 0.6         # object counts as "in the hand" within this distance of a wrist
+  radius_smoke: 1.5        # smoke counts as "at the face" within this distance of the mouth
+
+# Motion heuristic (used until a temporal model is trained, and as its baseline)
+motion:
+  near_thr: 0.6            # wrist this close to the mouth = "at mouth"
+  far_thr: 1.0             # wrist this far from the mouth = "away"
+  min_dwell_s: 0.3         # a puff keeps the hand at the mouth at least this long
+  max_dwell_s: 5.0         # longer than this looks like a phone call or chin rest
+  lookback_s: 3.0          # the hand must have been "away" this recently (a real approach)
+  busy_window_s: 20.0
+  busy_max_approaches: 4   # more approaches than this in busy_window_s looks like eating
+  busy_penalty: 0.5
+
+# Stage 3: fusion of object and motion evidence
+fusion:
+  obj_thr: 0.35            # object evidence needed when motion agrees
+  mot_thr: 0.50            # motion evidence needed when the object agrees
+  obj_strong: 0.75         # object alone is enough above this
+  mot_strong: 0.95         # motion alone is enough above this (kept high: eating looks similar)
+  obj_percentile: 80       # robust per-window object score (ignores one-frame spikes)
+
+# Event smoothing per person
+events:
+  n_on: 4                  # look at the last n_on decisions...
+  k_on: 2                  # ...and start an event when at least k_on are positive
+  m_off: 5                 # end the event after m_off negative decisions in a row
+
+temporal_checkpoint: null  # after step 9: models/temporal.pt

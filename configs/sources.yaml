@@ -1,0 +1,97 @@
+# Datasets to merge. Each entry is a Roboflow Universe project.
+#
+# role:      train -> used for train/val (split by image group)
+#            test  -> held out ENTIRELY as the external test set
+# priority:  when the same image appears in several sources, the copy from
+#            the lowest priority number is kept and the others are dropped
+# class_map: source class name -> unified class (configs/taxonomy.yaml),
+#            or null to drop boxes of that class.
+#            Names are matched case-insensitively. Step 2 refuses to run if a
+#            source has a class that is not listed here, so every class gets
+#            an explicit decision.
+#
+# IMPORTANT: the class names below were taken from the Roboflow pages and are
+# NOT verified. Run `python scripts/01_download_sources.py` first; it writes
+# audit/report.md with the real class names, box counts and sample crops per
+# class. Fix this file from what you see there, especially the REVIEW lines.
+
+roboflow_format: yolov8   # Roboflow's YOLOv8 export = the same layout YOLO11/YOLO26 use
+
+sources:
+  kyunghee:
+    workspace: kyunghee-university-ada5d
+    project: smoking-detection-3gefl
+    version: latest
+    role: train
+    priority: 1
+    license: "verify on the Roboflow page"
+    class_map:
+      cigarette: cigarette
+      smoke: smoke
+      person: null        # people come from the pose model
+      smoking: null       # REVIEW: look at the crops; if it boxes hand+cigarette, consider mapping to cigarette
+
+  jeju:
+    workspace: jejuuniversity
+    project: smoking-ppkpw-hwhjf
+    version: latest
+    role: train
+    priority: 2
+    license: "CC BY 4.0"
+    class_map:
+      "cigarette smokers - v3 smoker3": null   # REVIEW: odd export name; inspect crops before mapping
+      smoker: null                              # REVIEW: likely a whole-person box. If so, this source adds
+                                                # no object boxes and can be set to role: skip
+
+  richie_lab:
+    workspace: richie-lab
+    project: smoking-tasfx
+    version: latest
+    role: train
+    priority: 3
+    license: "CC BY 4.0"
+    class_map:
+      cigarette: cigarette
+      vape: vape
+      smoke: smoke
+      person: null
+      smoking: null       # REVIEW: inspect crops
+
+  takoyati:
+    workspace: takoyati
+    project: cigarette-vape-detection
+    version: latest
+    role: train
+    priority: 4
+    license: "verify on the Roboflow page"
+    class_map:
+      cigarette: cigarette
+      vape: vape
+
+  # ---- External test sources: never seen during training ------------------
+  # Two newer, independent sources, so the test score reflects images from
+  # people and cameras the model has never seen.
+  smoker_yolo:
+    workspace: cigaretteple-7m0hn
+    project: smoker-yolo
+    version: latest
+    role: test
+    priority: 10
+    license: "CC BY 4.0"
+    class_map:
+      cigarette: cigarette
+
+  livestream:
+    workspace: livestreamdetection
+    project: smoking-vape-detection
+    version: latest
+    role: test
+    priority: 11
+    license: "verify on the Roboflow page"
+    class_map:
+      cigarette: cigarette
+      "vape pen": vape
+      smoke: smoke
+      smoking: null       # REVIEW
+      vaping: null        # REVIEW: likely a person-vaping box
+      objects: null
